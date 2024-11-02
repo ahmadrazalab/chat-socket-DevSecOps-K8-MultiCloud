@@ -2,93 +2,103 @@ name: Build ChatAPP
 
 on:
   push:
-    # branches:
-      # - main
+    branches:
+      - main
     tags:
       - '*'
       # - 'v.*'
 
 jobs:
-  code-scan:
-    runs-on: digitalocean
-    if: startsWith(github.event.ref, 'refs/tags/v')
+  # code-scan:
+  #   runs-on: digitalocean
+  #   if: startsWith(github.event.ref, 'refs/tags/v')
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
     
-    - name: run conatiner to scan the code review 
-      run: |
-        docker run --rm -e SONAR_HOST_URL="${{ secrets.SONAR_HOST }}" -e SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}" -v "$(pwd):/usr/src"   sonarsource/sonar-scanner-cli
+  #   - name: run conatiner to scan the code review 
+  #     run: |
+  #       docker run --rm -e SONAR_HOST_URL="${{ secrets.SONAR_HOST }}" -e SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}" -v "$(pwd):/usr/src"   sonarsource/sonar-scanner-cli
 
   build-api:
-    runs-on: digitalocean
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     
     - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
     - name: Build Docker image
-      run: docker build -t noscopev6/chatapp-b:$GITHUB_SHA .
+      run: docker build -t noscopev6/chatapp-b:$GITHUB_REF_NAME . # $GITHUB_SHA .
 
     - name: Push Docker image
-      run: docker push noscopev6/chatapp-b:$GITHUB_SHA
+      run: docker push noscopev6/chatapp-b:$GITHUB_REF_NAME # $GITHUB_SHA
 
     - name: Push Docker image
       run: docker logout
-    
+   
   build-frontend:
-    runs-on: digitalocean
-    needs: build-api  # This job will run only if 'build-api' succeeds
+    runs-on: ubuntu-latest  # Using ubuntu-latest as the runner
+    needs: build-api  # This job depends on 'build-api' and will run only if it succeeds
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Build Docker image
-      run: cd ./frontend/chat-app && docker build -t noscopev6/chatapp-f:$GITHUB_SHA .
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-    - name: Push Docker image
-      run: docker push noscopev6/chatapp-f:$GITHUB_SHA
+      - name: Build Docker image
+        working-directory: ./frontend/chat-app  # Set working directory for frontend
+        run: docker build -t noscopev6/chatapp-f:$GITHUB_REF_NAME . # $GITHUB_SHA .
 
-    - name: Push Docker image
-      run: docker logout
+      - name: Push Docker image
+        run: docker push noscopev6/chatapp-f:$GITHUB_REF_NAME  # $GITHUB_SHA .
 
-  images-scan-trevy:
-    runs-on: digitalocean
-    needs: build-frontend
-    if: startsWith(github.event.ref, 'refs/tags/v') 
+      - name: Log out from Docker Hub
+        run: docker logout
 
-    steps:
-    - name: Docker Image Scan frontend
-      run: trivy image  noscopev6/chatapp-f:$GITHUB_SHA
+  # images-scan-trevy:
+  #   runs-on: digitalocean
+  #   needs: build-frontend
+  #   if: startsWith(github.event.ref, 'refs/tags/v') 
 
-    - name: Docker Image Scan backend
-      run: trivy image  noscopev6/chatapp-b:$GITHUB_SHA
+  #   steps:
+  #   - name: Docker Image Scan frontend
+  #     run: trivy image  noscopev6/chatapp-f:$GITHUB_SHA
 
-  deploy-to-prod-doks:
-    runs-on: digitalocean
-    needs: build-frontend
-    # if: startsWith(github.event.ref, 'refs/tags/v') 
+  #   - name: Docker Image Scan backend
+  #     run: trivy image  noscopev6/chatapp-b:$GITHUB_SHA
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+  # deploy-to-prod-doks:
+  #   runs-on: digitalocean
+  #   needs: build-frontend
+  #   # if: startsWith(github.event.ref, 'refs/tags/v') 
+
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
       
-    - name: Deploy frontend
-      run: |
-        pwd
-        ls -la
-        sed -i "17s/.*/        image: noscopev6\/chatapp-f:$GITHUB_SHA/" ./kube-prod/f-chatapp.yaml
-        kubectl apply -f ./kube-prod/f-chatapp.yaml
+  #   - name: Deploy frontend
+  #     run: |
+  #       pwd
+  #       ls -la
+  #       sed -i "17s/.*/        image: noscopev6\/chatapp-f:$GITHUB_SHA/" ./kube-prod/f-chatapp.yaml
+  #       kubectl apply -f ./kube-prod/f-chatapp.yaml
 
-    - name: Deploy backend
-      run: |
-        sed -i "19s/.*/        image: noscopev6\/chatapp-b:$GITHUB_SHA/" ./kube-prod/b-chatapp.yaml
-        kubectl apply -f ./kube-prod/b-chatapp.yaml
+  #   - name: Deploy backend
+  #     run: |
+  #       sed -i "19s/.*/        image: noscopev6\/chatapp-b:$GITHUB_SHA/" ./kube-prod/b-chatapp.yaml
+  #       kubectl apply -f ./kube-prod/b-chatapp.yaml
