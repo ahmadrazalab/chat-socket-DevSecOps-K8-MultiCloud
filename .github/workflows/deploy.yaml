@@ -40,8 +40,10 @@ jobs:
 
     - name: Build Docker image
       # working-directory: ./chatapp-backend  # Set working directory
-      run: docker build -t noscopev6/chatapp-b:$GITHUB_REF_NAME ./chatapp-backend/ # $GITHUB_SHA .
-
+      run: |
+        cd chatapp-backend
+        docker build -t noscopev6/chatapp-b:$GITHUB_REF_NAME . 
+        
     - name: Push Docker image
       run: docker push noscopev6/chatapp-b:$GITHUB_REF_NAME # $GITHUB_SHA
 
