@@ -1,0 +1,103 @@
+name: Build application docker images for staging env
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Log in to Docker Hub
+      env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      working-directory: ./chatapp-backend  
+      run: docker build -t noscopev6/chatapp-b:$GITHUB_REF_NAME . 
+        
+    - name: Push Docker image
+      run: docker push noscopev6/chatapp-b:$GITHUB_REF_NAME 
+
+    - name: Push Docker image
+      run: docker logout
+   
+  build-frontend:
+    runs-on: ubuntu-latest  # Using ubuntu-latest as the runner
+    needs: build-api  # This job depends on 'build-api' and will run only if it succeeds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Build Docker image
+        working-directory: ./chatapp-frontend  
+        run: docker build -t noscopev6/chatapp-f:$GITHUB_REF_NAME . 
+
+      - name: Push Docker image
+        run: docker push noscopev6/chatapp-f:$GITHUB_REF_NAME  
+
+      - name: Log out from Docker Hub
+        run: docker logout
+
+  build-todo:
+    runs-on: ubuntu-latest  # Using ubuntu-latest as the runner
+    needs: build-api  # This job depends on 'build-api' and will run only if it succeeds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Build Docker image
+        working-directory: ./todo-frontend  # Set working directory for frontend
+        run: docker build -t noscopev6/chatapp-f:$GITHUB_REF_NAME . 
+
+      - name: Push Docker image
+        run: docker push noscopev6/chatapp-f:$GITHUB_REF_NAME  
+
+      - name: Log out from Docker Hub
+        run: docker logout
+
+
+  # deploy-to-staging-EKS-ns:
+  #   runs-on: digitalocean
+  #   needs: build-frontend
+  #   # if: startsWith(github.event.ref, 'refs/tags/v') 
+
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
+      
+  #   - name: Deploy frontend
+  #     run: |
+  #       pwd
+  #       ls -la
+  #       sed -i "17s/.*/        image: noscopev6\/chatapp-f:$GITHUB_SHA/" ./kube-prod/f-chatapp.yaml
+  #       kubectl apply -f ./kube-prod/f-chatapp.yaml
+
+  #   - name: Deploy backend
+  #     run: |
+  #       sed -i "19s/.*/        image: noscopev6\/chatapp-b:$GITHUB_SHA/" ./kube-prod/b-chatapp.yaml
+  #       kubectl apply -f ./kube-prod/b-chatapp.yaml

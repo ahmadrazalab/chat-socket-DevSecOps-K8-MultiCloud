@@ -1,0 +1,78 @@
+# deploy ingress namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alb-ingress-controller
+
+
+---
+
+# deploy ingress controller
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: alb-ingress-controller
+  name: alb-ingress-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alb-ingress-controller
+  template:
+    metadata:
+      labels:
+        app: alb-ingress-controller
+    spec:
+      serviceAccountName: alb-ingress-controller
+      containers:
+      - name: alb-ingress-controller
+        image: amazon/aws-alb-ingress-controller:v2.4.2 # Use the latest version
+        args:
+          - --cluster-name=<your-eks-cluster-name>
+          - --aws-region=<your-region>
+          - --ingress-class=alb
+
+--- 
+
+# deploy ingress service 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chat-app-ingress
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: "alb"  # Specifies the use of ALB Ingress
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-acm-certificate-id  # Replace with your ACM certificate ARN
+    alb.ingress.kubernetes.io/actions.ssl-redirect: >
+      {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "StatusCode": "HTTP_301"}}
+spec:
+  rules:
+    - host: chatapi.ahmadraza.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-app-backend-service
+                port:
+                  number: 80
+    - host: chat.ahmadraza.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: chat-app-frontend-service
+                port:
+                  number: 80
+  # tls:
+  #   - hosts:
+  #       - chatapi.ahmadraza.in
+  #       - chat.ahmadraza.in
+  #     secretName: your-tls-secret  # Replace with your TLS secret for HTTPS (ACM certificate)
+
