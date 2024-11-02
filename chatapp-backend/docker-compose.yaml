@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    image: freeapi-backend
+    build: .
+    ports:
+      - "8080:8080"
+    # volumes:
+      # - ./:/usr/src/freeapi
+      # - /usr/src/freeapi/node_modules
+    depends_on:
+      - mongodb
+    env_file:
+      - ./.env.local
+    container_name: freeapi-backend
+    networks:
+      - freeapi-internal
+    
+
+  mongodb:
+    image: mongo
+    volumes:
+      - db-data:/data/db
+    ports:
+      - "27017:27017"
+    container_name: app-mongodb
+    networks:
+      - freeapi-internal
+
+networks:
+  freeapi-internal:
+
+volumes:
+  db-data:

@@ -1,24 +1,23 @@
-# NODE alpine to decrease the size of the conatiner 
-FROM node:20.13.1-alpine
-# FROM node
+# Use the official Node.js 20.x image as the base
+FROM node:20-alpine
 
-RUN mkdir -p /usr/src/freeapi && chown -R node:node /usr/src/freeapi
+# Set the working directory in the container
+WORKDIR /app
 
-WORKDIR /usr/src/freeapi
+# Copy package.json and package-lock.json to install dependencies
+# COPY package*.json ./
+# COPY ./prepare.js prepare.js
+COPY . .
 
-# Copy package json and yarn lock only to optimise the image building
-COPY package.json yarn.lock ./
-COPY .env.compose .env
-# COPY .env .
-# copy prepare.js prior. It will be executed after package installation and before ROOT dir is cloned
-COPY prepare.js .
+# Install dependencies
+RUN npm install
 
-USER node
+# Copy the rest of the application files
+# COPY . .
+COPY ./.env.local .env
 
-RUN yarn install --pure-lockfile
-
-COPY --chown=node:node . .
-
+# Expose the port that the app runs on
 EXPOSE 8080
 
-CMD [ "npm", "start" ]
+# Start the application
+CMD ["npm", "start"]

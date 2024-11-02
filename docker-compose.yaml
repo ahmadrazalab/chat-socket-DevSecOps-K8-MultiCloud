@@ -28,9 +28,9 @@ services:
     build: ./chatapp-backend
     ports:
       - "8080:8080"
-    volumes:
-      - ./:/usr/src/freeapi
-      - /usr/src/freeapi/node_modules
+    # volumes:
+      # - ./:/usr/src/freeapi
+      # - /usr/src/freeapi/node_modules
     depends_on:
       - mongodb
     env_file:
