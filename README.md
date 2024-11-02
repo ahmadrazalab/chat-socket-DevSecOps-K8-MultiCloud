@@ -1,6 +1,3 @@
-
-
-
 # HOW TO Deploy APP on `EKS-Cluster`
 
 ### Architecture Diagram
