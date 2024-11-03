@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-app-frontend-deployment
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-app-frontend
+  template:
+    metadata:
+      labels:
+        app: chat-app-frontend
+    spec:
+      containers:
+      - name: chat-app-frontend
+        image: noscopev6/chatapp-b:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: VITE_SERVER_URI
+          value: "https://chatapi.ahmadraza.in/api/v1"   # Backend API URL
+        - name: VITE_SOCKET_URI
+          value: "https://chatapi.ahmadraza.in"          # Backend Socket URL
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-app-frontend-service
+  namespace: production
+  labels:
+    app: chat-app-frontend
+spec:
+  selector:
+    app: chat-app-frontend
+  ports:
+    - port: 80
+      targetPort: 3000  # The frontend container's port
+      protocol: TCP
+  type: NodePort  # Or "LoadBalancer" if external access is required
