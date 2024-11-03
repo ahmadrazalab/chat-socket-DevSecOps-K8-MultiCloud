@@ -4,47 +4,58 @@ kind: Ingress
 metadata:
   namespace: production
   name: chatapp-ingress
-  annotations:
-    kubernetes.io/ingress.class: azure-application-gateway
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"  # Enforce HTTPS for external access
 spec:
   ingressClassName: azure-application-gateway
+  tls:
+    - hosts:
+        - nginx.ahmadraza.in  # Adding the new hostname for nginx
+      secretName: chatapp-secret-tls  # The TLS secret created in the previous steps
   rules:
-    - host: chat.ahmadraza.in  # Host for frontend application (HTTPS for public access)
+    - host: chat.ahmadraza.in  
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: chat-app-frontend-service  # Replace with your frontend service name
+                name: chat-app-frontend-service 
                 port:
-                  number: 80  # Internal communication over HTTP
+                  number: 80 
 
-    - host: chatapi.ahmadraza.in  # Host for backend service (HTTPS for public access)
+    - host: chatapi.ahmadraza.in  
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: chat-app-backend-service  # Replace with your backend service name
+                name: chat-app-backend-service 
                 port:
-                  number: 80  # Internal communication over HTTP
-    # - host: nginx.ahmadraza.in 
+                  number: 80                
+    # - http:
+    #     paths:
+    #       - path: /  # Testing with LB IP 
+    #         pathType: Prefix
+    #         backend:
+    #           service:
+    #             name: nginx-service
+    #             port:
+    #               number: 80
+    # - host: nginx.ahmadraza.in  # New rule for nginx
     #   http:
     #     paths:
     #       - path: /
     #         pathType: Prefix
     #         backend:
     #           service:
-    #             name: nginx-service 
+    #             name: nginx-service
     #             port:
-    #               number: 80  
+    #               number: 80
 
 
 ## create and store the ssl certificate in secrets 
-# kubectl create secret tls chatapp-secret-tls --cert=tls.crt --key=tls.key -n azure-ingress  # Ensure this matches your namespace
-# kubectl describe secret chatapp-secret-tls -n azure-ingress
-# kubectl get secret chatapp-secret-tls -n azure-ingress -o yaml
+# kubectl create secret tls chatapp-secret-tls --cert=tls.crt --key=tls.key -n production  # Ensure this matches your namespace
+# kubectl describe secret chatapp-secret-tls -n production
+# kubectl get secret chatapp-secret-tls -n production -o yaml
 # echo "<base64_encoded_certificate>" | base64 --decode
+
