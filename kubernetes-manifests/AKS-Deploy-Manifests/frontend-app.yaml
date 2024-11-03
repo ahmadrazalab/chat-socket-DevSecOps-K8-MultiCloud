@@ -15,14 +15,13 @@ spec:
     spec:
       containers:
       - name: chat-app-frontend
-        image: noscopev6/chatapp-b:latest
+        image: noscopev6/chatapp-f:v3.1.1
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
-        env:
-        - name: VITE_SERVER_URI
-          value: "https://chatapi.ahmadraza.in/api/v1"   # Backend API URL
-        - name: VITE_SOCKET_URI
-          value: "https://chatapi.ahmadraza.in"          # Backend Socket URL
+        envFrom:
+          - configMapRef:
+              name: chat-app-frontned-configmap
 
 
 ---

@@ -18,7 +18,18 @@ data:
 
 --- 
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat-app-frontned-configmap
+  namespace: production
+data:
+  VITE_SERVER_URI: https://chatapi.ahmadraza.in/api/v1
+  VITE_SOCKET_URI: https://chatapi.ahmadraza.in
 
+
+
+---
 # apiVersion: v1
 # kind: ConfigMap
 # metadata:
@@ -35,3 +46,5 @@ data:
 #   REFRESH_TOKEN_EXPIRY: "10d"
 #   CORS_ORIGIN: "https://chat.ahmadraza.in,https://todo.ahmadraza.in"
 #   FREEAPI_HOST_URL: "https://chatapi.ahmadraza.in"
+
+

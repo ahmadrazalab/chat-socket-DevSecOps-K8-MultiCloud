@@ -48,8 +48,6 @@ jobs:
    
   build-frontend:
     runs-on: ubuntu-latest 
-    needs: build-api  
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -70,29 +68,29 @@ jobs:
       - name: Log out from Docker Hub
         run: docker logout
 
-  build-todo:
-    runs-on: ubuntu-latest  
-    needs: build-api  
+  # build-todo:
+  #   runs-on: ubuntu-latest  
+  #   needs: build-api  
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Log in to Docker Hub
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+  #     - name: Log in to Docker Hub
+  #       env:
+  #         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  #       run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-      - name: Build Docker image
-        working-directory: ./todo-frontend 
-        run: docker build -t noscopev6/chatapp-f:$GITHUB_REF_NAME . 
+  #     - name: Build Docker image
+  #       working-directory: ./todo-frontend 
+  #       run: docker build -t noscopev6/todo-f:$GITHUB_REF_NAME . 
 
-      - name: Push Docker image
-        run: docker push noscopev6/chatapp-f:$GITHUB_REF_NAME
+  #     - name: Push Docker image
+  #       run: docker push noscopev6/todo-f:$GITHUB_REF_NAME
 
-      - name: Log out from Docker Hub
-        run: docker logout
+  #     - name: Log out from Docker Hub
+  #       run: docker logout
 
 
   # images-scan-trevy:

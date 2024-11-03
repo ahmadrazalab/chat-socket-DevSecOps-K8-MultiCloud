@@ -3,7 +3,7 @@ name: Build application docker images for staging env
 on:
   push:
     branches:
-      - staging
+      - staging-demo
 
 jobs:
   build-api:
