@@ -45,7 +45,17 @@ jobs:
 
     - name: Push Docker image
       run: docker logout
-   
+
+    - name: Install Trevy
+      run: |
+        curl -sSL https://get.traefik.io/trevy.sh | sh
+        sudo mv trevy /usr/local/bin/  # Move Trevy binary to a directory in PATH
+
+    - name: Run Trevy Scan
+      run: |
+        trevy scan noscopev6/chatapp-b:$GITHUB_REF_NAME || true  # Show the scan results in the terminal; add '|| true' to prevent failure
+
+
   build-frontend:
     runs-on: ubuntu-latest 
     steps:
