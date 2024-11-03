@@ -1,3 +1,4 @@
+commit.sh
 dist/
 package-lock.json
 sonar-project.properties.test
