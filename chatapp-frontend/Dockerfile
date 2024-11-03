@@ -17,13 +17,14 @@ WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
-COPY .env.prod .env
+
 
 # Install dependencies
 RUN npm install
 
 # Copy the entire application to the working directory
 COPY . .
+COPY .env.prod .env
 
 # Expose the port the app runs on
 EXPOSE 3000
