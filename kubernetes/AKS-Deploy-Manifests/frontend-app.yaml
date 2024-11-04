@@ -7,21 +7,23 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: chat-app-frontend
+      app: chat-app
+      tier: frontend
   template:
     metadata:
       labels:
-        app: chat-app-frontend
+        app: chat-app
+        tier: frontend
     spec:
       containers:
       - name: chat-app-frontend
-        image: noscopev6/chatapp-f:v3.1.2
+        image: noscopev6/chatapp-f:v3.1.5
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         envFrom:
           - configMapRef:
-              name: chat-app-frontned-configmap
+              name: chat-app-frontend-configmap
 
 
 ---
@@ -32,12 +34,13 @@ metadata:
   name: chat-app-frontend-service
   namespace: production
   labels:
-    app: chat-app-frontend
+    app: chat-app
 spec:
   selector:
-    app: chat-app-frontend
+    app: chat-app
+    tier: frontend
   ports:
     - port: 80
-      targetPort: 3000  # The frontend container's port
+      targetPort: 3000  
       protocol: TCP
-  type: NodePort  # Or "LoadBalancer" if external access is required
+  type: ClusterIP 

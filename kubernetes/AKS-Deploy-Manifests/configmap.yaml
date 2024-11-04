@@ -21,7 +21,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: chat-app-frontned-configmap
+  name: chat-app-frontend-configmap
   namespace: production
 data:
   VITE_SERVER_URI: https://chatapi.ahmadraza.in/api/v1

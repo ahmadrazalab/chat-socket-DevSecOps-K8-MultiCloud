@@ -3,12 +3,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: production
-  name: chatapp-ingress
+  name: chatapp-ingress-prod
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: azure-application-gateway
   tls:
     - hosts:
-        - nginx.ahmadraza.in  # Adding the new hostname for nginx
+        - nginx.ahmadraza.in
+        - chat.ahmadraza.in
+        - chatapi.ahmadraza.in  # Adding the new hostname for nginx
       secretName: chatapp-secret-tls  # The TLS secret created in the previous steps
   rules:
     - host: chat.ahmadraza.in  
@@ -20,7 +24,7 @@ spec:
               service:
                 name: chat-app-frontend-service 
                 port:
-                  number: 80 
+                  number: 80
 
     - host: chatapi.ahmadraza.in  
       http:
@@ -32,25 +36,25 @@ spec:
                 name: chat-app-backend-service 
                 port:
                   number: 80                
-    # - http:
-    #     paths:
-    #       - path: /  # Testing with LB IP 
-    #         pathType: Prefix
-    #         backend:
-    #           service:
-    #             name: nginx-service
-    #             port:
-    #               number: 80
-    # - host: nginx.ahmadraza.in  # New rule for nginx
-    #   http:
-    #     paths:
-    #       - path: /
-    #         pathType: Prefix
-    #         backend:
-    #           service:
-    #             name: nginx-service
-    #             port:
-    #               number: 80
+    - http:
+        paths:
+          - path: /  # Testing with LB IP 
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+    - host: nginx.ahmadraza.in  # New rule for nginx
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
 
 
 ## create and store the ssl certificate in secrets 
