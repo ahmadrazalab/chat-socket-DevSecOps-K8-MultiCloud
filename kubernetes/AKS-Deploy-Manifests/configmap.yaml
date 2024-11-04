@@ -12,39 +12,7 @@ data:
   ACCESS_TOKEN_EXPIRY: "1d"
   REFRESH_TOKEN_SECRET: "CMdDNtowK7fX0-5D9cv0oJ008MCFRSLHVTUkcyqgZAaIg9GG_OGzh9zMocyO3UtN1kBfLRn3DmVkxdO"
   REFRESH_TOKEN_EXPIRY: "10d"
-  CORS_ORIGIN: "https://chat.ahmadraza.in,https://todo.ahmadraza.in"
+  CORS_ORIGIN: "https://chat.ahmadraza.in"
   FREEAPI_HOST_URL: "https://chatapi.ahmadraza.in"
-
-
---- 
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: chat-app-frontend-configmap
-  namespace: production
-data:
-  VITE_SERVER_URI: https://chatapi.ahmadraza.in/api/v1
-  VITE_SOCKET_URI: https://chatapi.ahmadraza.in
-
-
-
----
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: chat-app-config-staging
-#   namespace: staging
-# data:
-#   NODE_ENV: "development"
-#   PORT: "8080"
-#   MONGO_MEMORY_SERVER_PORT: "10000"  # mongodb port for e2e testing
-#   EXPRESS_SESSION_SECRET: "7fdOMCFRSLD9cv1k-5n3Dz5n3DmVmVHVIg9GG_OGTUkBfLNdgZAwKDNtoCJ0X0cyqaM0ogR80-zh9kx0Mkx"
-#   ACCESS_TOKEN_SECRET: "LD9cv1kBfgRHVIg9GG_OGzh9TUkcyqgZAaM0o3DmVkx08MCFRSzMocyO3UtNdDNtoCJ0X0-5nLwK7fdO"
-#   ACCESS_TOKEN_EXPIRY: "1d"
-#   REFRESH_TOKEN_SECRET: "CMdDNtowK7fX0-5D9cv0oJ008MCFRSLHVTUkcyqgZAaIg9GG_OGzh9zMocyO3UtN1kBfLRn3DmVkxdO"
-#   REFRESH_TOKEN_EXPIRY: "10d"
-#   CORS_ORIGIN: "https://chat.ahmadraza.in,https://todo.ahmadraza.in"
-#   FREEAPI_HOST_URL: "https://chatapi.ahmadraza.in"
 
 

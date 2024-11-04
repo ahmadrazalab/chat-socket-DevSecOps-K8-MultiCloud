@@ -4,8 +4,8 @@ kind: Ingress
 metadata:
   namespace: production
   name: chatapp-ingress-prod
-  # annotations:
-  #   nginx.ingress.kubernetes.io/rewrite-target: /
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: azure-application-gateway
   tls:
@@ -35,16 +35,7 @@ spec:
               service:
                 name: chat-app-backend-service 
                 port:
-                  number: 80                
-    - http:
-        paths:
-          - path: /  # Testing with LB IP 
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx-service
-                port:
-                  number: 80
+                  number: 80   
     - host: nginx.ahmadraza.in  # New rule for nginx
       http:
         paths:

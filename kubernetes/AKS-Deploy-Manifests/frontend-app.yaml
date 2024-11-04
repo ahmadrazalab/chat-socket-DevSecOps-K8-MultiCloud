@@ -17,13 +17,10 @@ spec:
     spec:
       containers:
       - name: chat-app-frontend
-        image: noscopev6/chatapp-f:v3.1.5
+        image: noscopev6/chatapp-f:nbuild # v3.1.5
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
-        envFrom:
-          - configMapRef:
-              name: chat-app-frontend-configmap
+        - containerPort: 80
 
 
 ---
@@ -41,6 +38,6 @@ spec:
     tier: frontend
   ports:
     - port: 80
-      targetPort: 3000  
+      targetPort: 80  
       protocol: TCP
   type: ClusterIP 
