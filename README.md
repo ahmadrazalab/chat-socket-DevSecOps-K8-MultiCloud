@@ -1,77 +1,134 @@
-# HOW TO Deploy APP on `EKS-Cluster`
+# Chat Application Deployment Guide
 
-### Architecture Diagram
+This guide explains how to deploy the Chat Application across multiple cloud environments with HTTPS support.
 
 ![alt text](ChatAPP-EKS.png)
 
+## Supported Cloud Platforms
+- Amazon Elastic Kubernetes Service (EKS)
+- Azure Kubernetes Service (AKS)
+- DigitalOcean Kubernetes
 
->> STEP 1: Containerize
-- Update the environment variable in .env and yaml files
-    - Frontend ENV : Only Update the backend URL in .env and frontend yaml deployfile 
-    - Backend ENV : Update the Mongo DB URL + CORS Varialbe + Backend HOST_URL
-- build the chatapp-frontend and backend conatiner (Dockerfile is present in respective directory)
-- push the conatiner to dockerhub
+## Prerequisites
+- Kubernetes cluster set up on your chosen cloud platform
+- `kubectl` CLI tool installed
+- Access credentials configured for your cluster
+- Domain name for HTTPS setup
 
->> STEP 2: DB Deploy
-- Login to atllab mongo db account and create a mongo db cluster 
-- copy user connection URI String and Update in the .env and YAML of backend 
+## Deployment Structure
+The deployment configurations are organized by cloud platform:
+- `kubernetes/AKS-Deploy-Manifests/` - Azure Kubernetes Service configurations
+- `kubernetes/EKS-Manifests/` - Amazon EKS configurations
+- `kubernetes/DigitalOcean-Manifests/` - DigitalOcean Kubernetes configurations
 
->> STEP 3: EKS Cluster Deploy
-- Create a Cluster (master-node)
-- Create a Worker NODE to deploy conatiners
-- Install AWS CLI and configure it in local OR USE AWS CloudShell and `aws configure` (login with CLI Creds)
-- Login EKS master node with below cmd
-```bash
-aws eks --region <region-code> update-kubeconfig --name <cluster-name>
-```
-- Install the weave CNI for the connectivity between nodes
-```bash
-kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-```
-- Now Deploy the frontend and backend POD with their service 
-- Clone the repository where yaml files are stored
-```bash
-kubectl apply -f <file-name>  # put the file name one by one (4 yaml files)
-```
-- Now Check the SVC to check that service is connected to the conatiner/pod
-```bash
-kubectl describe svc <service-name> # inspect the end point variable in the chart for both frontend and backend svc
-```
+## Common Components
+All deployments include:
+- Frontend application deployment
+- Backend application deployment
+- MongoDB database
+- Load balancers
+- Ingress controllers
+- SSL/HTTPS configuration
 
->> STEP 4: HTTPS Certificate `ACM`
-- Create a certificate in the aws acm service & update the cname of that certificate in the DNS of you domain 
-```bash
-# use wild card while creating the certificate
-*.example.com
-```
+## Deployment Instructions
 
->> STEP 5: ALB 
-- Create a 2 Target group (frontend and backend)
-- add the node1 to frontend and node2 to backend target group
-- also update the port (svc-port) number while adding the node in target group 
-- now create a loadbalancer 
-   - add the https lisner as 443 port
-   - edit the rule of https listner
-   - edit the default listner rule and forward the traffic to backend target group 100%
-   - now add 1 more rule in https listener which create a rule that is if `host-header` is a frontend domain then forward the traffic to frontend target group 100% (put he frontend domain in the hostheader condition) as `chat-app.example.com`
+### Amazon EKS Deployment
+1. Create the namespace:
+   ```bash
+   kubectl apply -f kubernetes/EKS-Manifests/namespace.yaml
+   ```
 
->> STEP 6: DNS
-- create a DNS record for frontend and backend domain and add the same load balancer to both of them (CNAME record is required for ALB)
+2. Apply configurations and secrets:
+   ```bash
+   kubectl apply -f kubernetes/EKS-Manifests/configmap.yaml
+   kubectl apply -f kubernetes/EKS-Manifests/secret.yaml
+   ```
 
->> STEP 7: DONE
-- Now Visit the frontend and backend URL 
-```bash
-chat-app.example.com
-chat-app-api.example.com
-```
+3. Deploy MongoDB:
+   ```bash
+   kubectl apply -f kubernetes/EKS-Manifests/mongo-db-sec.yaml
+   ```
 
->> NOTE : Make Sure all the Security groups have all the required permission to access each other in the VPC 
+4. Deploy backend and frontend:
+   ```bash
+   kubectl apply -f kubernetes/EKS-Manifests/backend-deployment.yaml
+   kubectl apply -f kubernetes/EKS-Manifests/frontend-app.yaml
+   ```
 
+5. Configure ALB Ingress:
+   - Update the cluster name in `aws-alb-ingress.yaml`
+   - Update domain name if needed (current: chatapi.ahmadraza.in)
+   ```bash
+   kubectl apply -f kubernetes/EKS-Manifests/aws-alb-ingress.yaml
+   ```
 
-### INFRA SETUP : (coming soon....)
+### Azure AKS Deployment
+1. Deploy Application Gateway Ingress:
+   - Update domain name if needed (current: chat.ahmadraza.in)
+   ```bash
+   kubectl apply -f kubernetes/AKS-Deploy-Manifests/azure-ag-ingress.yaml
+   ```
 
-- Create a ConfigMap for the env variables of manifest files
-- CICD to Create a docker container and push to dockerhub when i push the code to git
-- Deploy EFK Loggin solution in EKS with dashboard to check the NODE and conatainer application logs
-- use AWS ALB ingress controller + auto scaling of nodes
-- Deploy Mongo Db in the ECS OR Fargate instead of `ATLAS`
+### DigitalOcean Kubernetes Deployment
+1. Deploy backend:
+   ```bash
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/b-chatapp.yaml
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/b-lb-chatapp.yaml
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/svc-nodeport-b.yaml
+   ```
+
+2. Deploy frontend:
+   ```bash
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/f-chatapp.yaml
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/f-lb-chatapp.yaml
+   kubectl apply -f kubernetes/DigitalOcean-Manifests/svc-nodeport-f.yaml
+   ```
+
+## Application Access
+After deployment, the application will be accessible via:
+- EKS: https://chatapi.ahmadraza.in
+- AKS: https://chat.ahmadraza.in
+- DigitalOcean: Through configured load balancer IP/hostname
+
+## SSL/HTTPS Configuration
+- EKS: Uses AWS Certificate Manager (ACM) with ALB
+- AKS: Uses Application Gateway with TLS termination
+- DigitalOcean: Configure SSL through DO Load Balancer
+
+## Monitoring and Maintenance
+- Use kubectl to check deployment status:
+  ```bash
+  kubectl get pods -n <namespace>
+  kubectl get svc -n <namespace>
+  kubectl get ingress -n <namespace>
+  ```
+
+- Check logs:
+  ```bash
+  kubectl logs <pod-name> -n <namespace>
+  ```
+
+## Troubleshooting
+1. If pods are not starting, check logs:
+   ```bash
+   kubectl describe pod <pod-name> -n <namespace>
+   ```
+
+2. If ingress is not working:
+   ```bash
+   kubectl describe ingress -n <namespace>
+   ```
+
+3. For networking issues:
+   ```bash
+   kubectl get events -n <namespace>
+   ```
+
+## Security Considerations
+- All sensitive information is stored in Kubernetes secrets
+- HTTPS is enabled for all external access
+- Network policies should be configured as per your security requirements
+- Regular updates and security patches should be applied
+
+## Note
+Remember to replace placeholder values like domain names and cluster names with your actual values before deployment.
