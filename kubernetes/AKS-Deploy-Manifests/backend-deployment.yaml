@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-app-backend-deployment
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        tier: backend
+    spec:
+      containers:
+      - name: chat-app-backend
+        image: noscopev6/chatapp-b:v3.1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: chat-app-config-prod
+          - secretRef:
+              name: chat-app-secret-prod
+        resources:
+          requests:
+            memory: "512Mi"  # Minimum memory request
+            cpu: "250m"      # Minimum CPU request
+          limits:
+            memory: "1Gi"    # Maximum memory limit
+            cpu: "500m"      # Maximum CPU limit
+        readinessProbe:
+          httpGet:
+            path: /  # Adjust the path based on your app
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /  # Adjust the path based on your app
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-app-backend-service
+  namespace: production
+  labels:
+    app: chat-app
+spec:
+  selector:
+    app: chat-app
+    tier: backend
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP
