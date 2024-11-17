@@ -1,0 +1,27 @@
+# replicas: {{ .Values.backend-deployment.replicas }}
+
+backend-deployment:
+  replicas: 2
+
+service:
+
+
+frontend-deployment:
+
+
+configmap:
+
+
+
+secrets:
+
+
+
+ingress:
+
+
+
+
+mongodb:
+
+
