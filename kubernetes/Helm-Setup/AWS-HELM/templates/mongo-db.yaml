@@ -1,0 +1,101 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.storage.storageClassName }}
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodb-pv
+spec:
+  capacity:
+    storage: {{ .Values.storage.size }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.storageClassName }}
+  csi:
+    driver: ebs.csi.aws.com
+    volumeHandle: {{ .Values.storage.ebsVolumeHandle }}
+
+---
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+  storageClassName: {{ .Values.storage.storageClassName }}
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-chat-prod
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: "mongodb-svc"
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: mongodb-chat-prod
+  template:
+    metadata:
+      labels:
+        app: mongodb-chat-prod
+    spec:
+      containers:
+        - name: mongodb-chat-prod
+          image: {{ .Values.mongo.image }}
+          ports:
+            - containerPort: {{ .Values.mongo.port }}
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: MONGO_INITDB_ROOT_PASSWORD
+          volumeMounts:
+            - name: mongodb-chat-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-chat-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}
+        storageClassName: {{ .Values.storage.storageClassName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.mongo.port }}
+  selector:
+    app: mongodb-chat-prod
+  clusterIP: None

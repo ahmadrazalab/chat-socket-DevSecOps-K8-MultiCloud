@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend-deployment
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: chat-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        tier: backend
+    spec:
+      containers:
+      - name: chat-app-backend
+        image: "{{ .Values.image.backend.repository }}:{{ .Values.image.backend.tag }}"
+        imagePullPolicy: {{ .Values.image.backend.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.backend.service.targetPort }}
+        env:
+          - name: NODE_ENV
+            value: {{ .Values.backend.env.NODE_ENV | quote }}
+          - name: PORT
+            value: {{ .Values.backend.env.PORT | quote }}
+        envFrom:
+          - configMapRef:
+              name: {{ .Release.Name }}-config
+          - secretRef:
+              name: {{ .Release.Name }}-secret
+        resources:
+          requests:
+            memory: {{ .Values.backend.resources.requests.memory }}
+            cpu: {{ .Values.backend.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.backend.resources.limits.memory }}
+            cpu: {{ .Values.backend.resources.limits.cpu }}

@@ -10,6 +10,10 @@ helm list
 helm uninstall <rel-name>
 ```
 
+```bash
+helm install chat-app ./chat-app
+helm upgrade chat-app ./chat-app
+```
 
 
 

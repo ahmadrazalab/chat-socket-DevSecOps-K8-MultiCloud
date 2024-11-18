@@ -1,6 +1,6 @@
 apiVersion: v2
-name: Helm-Setup
-description: A Helm chart for Kubernetes
+name: chat-app
+description: Helm chart for deploying ChatApp
 
 # A chart can be either an 'application' or a 'library' chart.
 #

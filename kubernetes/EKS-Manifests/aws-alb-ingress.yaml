@@ -36,7 +36,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-acm-certificate-id  # Replace with your ACM certificate ARN
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:1234df567835469012:certificate/your-acm-certificate-id  # Replace with your ACM certificate ARN
     alb.ingress.kubernetes.io/actions.ssl-redirect: >
       {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "StatusCode": "HTTP_301"}}
 spec:

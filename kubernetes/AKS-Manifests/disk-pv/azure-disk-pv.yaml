@@ -1,0 +1,32 @@
+# elasticsearch-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: default
+  azureDisk:
+    diskName: "db-storate-test"
+    diskURI: "/subscriptions/xxxxxx45b4-46e0-xxxxxxx7d2f/resourcegroups/xxxxxxxxxx/providers/Microsoft.Compute/disks/db-storate-test"
+    kind: Managed
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: mysql-pv
+
