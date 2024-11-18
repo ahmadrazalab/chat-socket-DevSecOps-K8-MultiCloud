@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@ahmadraza.in
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:   # Verify that Azure Application Gateway supports the http01 challenge for cert-manager. Configuration for http01 must align with Azure-specific requirements, including DNS settings and proper routing to the challenge endpoint.
+          ingress:
+            class: azure-application-gateway 
+
+
+## INstalll CertManager before issue (check for latest vers)
+# kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.yaml
