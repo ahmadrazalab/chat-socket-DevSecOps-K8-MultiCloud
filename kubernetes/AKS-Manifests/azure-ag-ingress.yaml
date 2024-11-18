@@ -5,48 +5,48 @@ metadata:
   namespace: production
   name: chatapp-ingress-prod
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
 spec:
   ingressClassName: azure-application-gateway
   tls:
     - hosts:
-        - nginx.ahmadraza.in
         - chat.ahmadraza.in
         - chatapi.ahmadraza.in
-      secretName: chatapp-secret-tls  # The TLS secret created in the previous steps
+      secretName: tls-secret
   rules:
-    - host: chat.ahmadraza.in  
+    - host: chat.ahmadraza.in
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: chat-app-frontend-service 
+                name: chat-app-frontend-service
                 port:
                   number: 80
 
-    - host: chatapi.ahmadraza.in  
+    - host: chatapi.ahmadraza.in
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: chat-app-backend-service 
-                port:
-                  number: 80   
-
-    - host: nginx.ahmadraza.in  # New rule for nginx
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx-service
+                name: chat-app-backend-service
                 port:
                   number: 80
+
+    # - host: nginx.ahmadraza.in  # New rule for nginx
+    #   http:
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    #         backend:
+    #           service:
+    #             name: nginx-service
+    #             port:
+    #               number: 80
 
 
 

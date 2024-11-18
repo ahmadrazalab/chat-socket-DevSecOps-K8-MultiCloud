@@ -1,19 +1,4 @@
-# echo -n "admin" | base64
-# echo -n "password123" | base64
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mongodb-chat-prod-secret
-  namespace: production
-type: Opaque
-data:
-  MONGO_INITDB_ROOT_USERNAME: YWRtaW4=
-  MONGO_INITDB_ROOT_PASSWORD: cGFzc3dvcmQxMjM=
-  MONGO_CONNECTION_STRING: XxxxxX                     #echo -n "mongodb://admin:password123@mongodb-service.mongodb.svc.cluster.local:27017" | base64
-
----
-
+# telnet mongodb-chat-prod-0.mongodb-headless-svc.production.svc.cluster.local 
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -21,7 +6,7 @@ metadata:
   name: mongodb-chat-prod
   namespace: production
 spec:
-  serviceName: "mongodb-svc"
+  serviceName: "mongodb-headless-svc"
   replicas: 1
   selector:
     matchLabels:
@@ -32,7 +17,7 @@ spec:
         app: mongodb-chat-prod
     spec:
       containers:
-        - name: mongodb-chat-prod
+        - name: mongodb
           image: mongo:6.0
           ports:
             - containerPort: 27017
@@ -48,11 +33,11 @@ spec:
                   name: mongodb-chat-prod-secret
                   key: MONGO_INITDB_ROOT_PASSWORD
           volumeMounts:
-            - name: mongodb-chat-storage
+            - name: mongodb-storage
               mountPath: /data/db
   volumeClaimTemplates:
     - metadata:
-        name: mongodb-chat-storage
+        name: mongodb-storage
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
@@ -61,63 +46,26 @@ spec:
         storageClassName: ebs-sc
 
 ---
-# DB Svc
+
+# MongoDB Headless Service for StatefulSet
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb-service
-  namespace: mongodb
+  name: mongodb-headless-svc
+  namespace: production
 spec:
   ports:
     - port: 27017
+      targetPort: 27017
+  clusterIP: None
   selector:
-    app: mongodb
-  clusterIP: None # For StatefulSet
-
-
+    app: mongodb-chat-prod
 ---
-# EBS Stotage Class Define  
 
+# StorageClass for AWS EBS
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: ebs-sc
 provisioner: ebs.csi.aws.com
 volumeBindingMode: WaitForFirstConsumer
-
-
----
-
-# EBS PV
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mongodb-pv
-spec:
-  capacity:
-    storage: 10Gi
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ebs-sc
-  csi:
-    driver: ebs.csi.aws.com
-    volumeHandle: <EBS_VOLUME_ID> # Replace with your EBS volume ID
-
----
-# EBS PVC
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-  namespace: mongodb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: ebs-sc
-
