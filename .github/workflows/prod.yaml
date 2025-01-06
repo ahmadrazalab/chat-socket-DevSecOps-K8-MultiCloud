@@ -3,9 +3,8 @@ name: Build ChatAPP
 on:
   push:
     branches:
-      - main
-    tags:
-      - 'v*'
+      - prod
+
 
 jobs:
   # code-scan:

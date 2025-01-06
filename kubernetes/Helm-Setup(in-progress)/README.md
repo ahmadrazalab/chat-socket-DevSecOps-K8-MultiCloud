@@ -1,7 +1,5 @@
 # This Helm is compatible with aws only 
 
-
-
 ```bash
 helm create <name>
 
@@ -21,3 +19,4 @@ helm upgrade chat-app ./chat-app
 ```bash
 helm package <chart-directory>
 ```
+
