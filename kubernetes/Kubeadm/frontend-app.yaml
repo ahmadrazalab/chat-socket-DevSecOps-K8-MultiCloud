@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: chat-app-frontend
-        image: noscopev6/chatapp-f:v4.0.2
+        image: noscopev6/chatapp-f:v5.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 80

@@ -17,15 +17,15 @@ spec:
     spec:
       containers:
       - name: chat-app-backend
-        image: noscopev6/chatapp-b:v4.0.3
+        image: noscopev6/chatapp-b:v5.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        envFrom:
-          - configMapRef:
-              name: chat-app-config-prod
-          - secretRef:
-              name: chat-app-secret-prod
+        # envFrom:
+        #   - configMapRef:
+        #       name: chat-app-config-prod
+        #   - secretRef:
+        #       name: chat-app-secret-prod
         resources:
           requests:
             memory: "512Mi"  # Minimum memory request
