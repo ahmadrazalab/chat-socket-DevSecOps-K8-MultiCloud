@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: chat-app-frontend-deployment
-  namespace: production
+  namespace: chatappns
 spec:
   replicas: 1
   selector:
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: chat-app-frontend-service
-  namespace: production
+  namespace: chatappns
   labels:
     app: chat-app
 spec:

@@ -1,31 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chat-app-backend-deployment
+  name: chat-app-frontend-deployment
   namespace: chatappns
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: chat-app
-      tier: backend
+      tier: frontend
   template:
     metadata:
       labels:
         app: chat-app
-        tier: backend
+        tier: frontend
     spec:
       containers:
-      - name: chat-app-backend
-        image: noscopev6/chatapp-b:v3.1.0
+      - name: chat-app-frontend
+        image: noscopev6/chatapp-f:v4.0.2
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
-        envFrom:
-          - configMapRef:
-              name: chat-app-config-prod
-          - secretRef:
-              name: chat-app-secret-prod
+        - containerPort: 80
         resources:
           requests:
             memory: "512Mi"  # Minimum memory request
@@ -56,16 +51,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: chat-app-backend-service
+  name: chat-app-frontend-service
   namespace: chatappns
   labels:
     app: chat-app
 spec:
   selector:
     app: chat-app
-    tier: backend
+    tier: frontend
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 80  
       protocol: TCP
-  type: ClusterIP
+  type: ClusterIP 

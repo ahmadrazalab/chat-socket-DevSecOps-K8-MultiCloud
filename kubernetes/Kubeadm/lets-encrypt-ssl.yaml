@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@ahmadraza.in
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    solvers:
+      - http01:
+          ingress:
+            class: alb
+
+
+## INstalll CertManager before issue (check for latest vers)
+# kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.0/cert-manager.yaml

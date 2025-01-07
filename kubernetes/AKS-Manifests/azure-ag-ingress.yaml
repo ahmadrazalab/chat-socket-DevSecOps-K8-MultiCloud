@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: production
+  namespace: chatappns
   name: chatapp-ingress-prod
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"

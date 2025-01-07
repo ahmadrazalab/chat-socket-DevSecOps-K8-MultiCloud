@@ -4,7 +4,7 @@ metadata:
   name: chat-app-backend-deployment
   namespace: chatappns
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: chat-app
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: chat-app-backend
-        image: noscopev6/chatapp-b:v3.1.0
+        image: noscopev6/chatapp-b:v4.0.2
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

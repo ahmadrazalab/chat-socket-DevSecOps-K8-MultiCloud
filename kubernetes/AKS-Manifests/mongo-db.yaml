@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongodb
-  namespace: production
+  namespace: chatappns
 spec:
   serviceName: mongodb-headless
   replicas: 1
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
-  namespace: production
+  namespace: chatappns
 spec:
   ports:
     - port: 27017
@@ -67,7 +67,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb-headless
-  namespace: production
+  namespace: chatappns
 spec:
   ports:
     - port: 27017
@@ -81,7 +81,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mongodb-pv
-  namespace: production
+  namespace: chatappns
 spec:
   capacity:
     storage: 10Gi                              # Updated storage capacity
@@ -101,7 +101,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mongodb-pvc
-  namespace: production
+  namespace: chatappns
 spec:
   accessModes:
     - ReadWriteOnce
