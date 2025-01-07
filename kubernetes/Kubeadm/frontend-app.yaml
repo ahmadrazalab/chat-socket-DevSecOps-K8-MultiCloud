@@ -4,7 +4,7 @@ metadata:
   name: chat-app-frontend-deployment
   namespace: chatappns
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: chat-app
@@ -61,6 +61,6 @@ spec:
     tier: frontend
   ports:
     - port: 80
-      targetPort: 80  
+      targetPort: 3000 
       protocol: TCP
   type: ClusterIP 
