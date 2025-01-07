@@ -25,6 +25,7 @@ RUN npm install
 # Copy the entire application to the working directory
 COPY . .
 # COPY .env.prod .env
+COPY .env.compose .env
 
 # Expose the port the app runs on
 EXPOSE 3000
