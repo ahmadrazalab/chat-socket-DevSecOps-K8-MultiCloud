@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build and Push F Docker Images
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - "v*"  # Trigger only on tag creation
 
 jobs:
-  build-and-push:
+  b-build-and-push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
 
@@ -30,3 +30,28 @@ jobs:
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.ref_name }} .
           docker push ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.ref_name }}
+
+  f-build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: docker.io   # Docker Hub registry
+      FRONTEND_IMAGE_NAME: noscopev6/chatapp-f  # Image name for the frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and Push Frontend Image
+        working-directory: chatapp-frontend
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.ref_name }} .
+          docker push ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.ref_name }}
