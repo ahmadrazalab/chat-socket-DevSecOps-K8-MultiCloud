@@ -1,4 +1,4 @@
-name: Build and Push F Docker Images
+name: Chatapp Build and Push Docker Images
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   b-build-and-push:
-    name: Build and Push Docker Images
+    name: Backend Images
     runs-on: ubuntu-latest
 
     env:
@@ -25,14 +25,14 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build and Push Backend Image
+      - name: Backend Images
         working-directory: chatapp-backend
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.ref_name }} .
           docker push ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.ref_name }}
 
   f-build-and-push:
-    name: Build and Push Docker Images
+    name: Frontend Images
     runs-on: ubuntu-latest
 
     env:
@@ -50,7 +50,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build and Push Frontend Image
+      - name: Frontend Images
         working-directory: chatapp-frontend
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.ref_name }} .
